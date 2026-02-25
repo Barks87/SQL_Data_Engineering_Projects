@@ -1,6 +1,6 @@
 # SQL Data Engineering Projects
 
-SQL analysis of global job market data, built on DuckDB and MotherDuck.
+SQL analysis of Scandinavian job market data, built on DuckDB and MotherDuck.
 
 ## Projects
 

@@ -6,8 +6,15 @@ A SQL project analyzing the Scandinavin (Danish, Swedish, Norwegian, Finnish) da
 - **Data modeling**: Used multi-table joins across fact and dimension tables to extract insights
 - **Analytics**: Applied aggregations, filtering, and sorting to find top skills by demand, salary, and overall value
 - **Outcome**: Delivered actionable insights on SQL/Python dominance, cloud trends, and salary patterns
-## Quick Visual Summary
-HTML / Github
+
+## Optimal Skills for Scandinavian Data Engineers
+
+Skills ranked by a combined score of median salary × LN(demand count),
+balancing financial reward with market relevance.
+
+[![Optimal Skills Chart](HTML_Images/optimal_score.png)](https://barks87.github.io/SQL_Data_Engineering_Projects/1_EDA/HTML_Images/Scandinavian%20Data%20Engineer%20Skills.html)
+
+*Click the chart to explore the interactive version — salary ranking, optimal score, and scatter view.*
 
 ## Problem & Context
 Job market analysts need to answer questions like:
@@ -23,14 +30,14 @@ This project analyzes a data warehouse built using a star schema design. The war
 
 ## SQL Skills Demonstrated
 ### Query Design & Optimization
-- **Complex Joins**: Multi-table 'INNER JOIN' operations across 'job_postings_fact', 'skills_job_dim', and 'skills_dim'
-- **Aggregations**: 'COUNT()', 'MEDIAN()', 'ROUND()' for statistical analysis
-- **Filtering**: Boolean logic with 'WHERE' clauses and multiple conditions ('job_title_short', 'salary_year_avg' 'IS NOT NULL')
-- **Sorting & Limiting**: 'ORDER BY' with 'DESC' and 'LIMIT' for top-N analysis
+- **Complex Joins**: Multi-table `INNER JOIN` operations across `job_postings_fact`, `skills_job_dim`, and `skills_dim`
+- **Aggregations**: `COUNT()`, `MEDIAN()`, `ROUND()` for statistical analysis
+- **Filtering**: Boolean logic with 'WHERE' clauses and multiple conditions (`job_title_short`, `salary_year_avg` `IS NOT NULL`)
+- **Sorting & Limiting**: `ORDER BY` with `DESC` and `LIMIT` for top-N analysis
 
 ### Data Analysis Techniques
-- **Grouping**: 'GROUP BY' for categorical analysis by skill
-- **Mathematical Functions**: 'LN()' for natural logarithm transformation to normalize demand metrics
+- **Grouping**: `GROUP BY` for categorical analysis by skill
+- **Mathematical Functions**: `LN()` for natural logarithm transformation to normalize demand metrics
 - **Calculated Metrics**: Derived optimal score combining log-transformed demand with median salary
 - **HAVING Clause**: Filtering aggregated results (skills with >= 100 postings)
-- **NULL Handling**: Proper filtering of incomplete records ('salary_year_avg IS NOT NULL')
+- **NULL Handling**: Proper filtering of incomplete records (`salary_year_avg IS NOT NULL`)

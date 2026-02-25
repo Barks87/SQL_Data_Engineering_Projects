@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scandinavian Data Engineer Skills</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --border: #2a2a2a;
+    --text: #e0e0e0;
+    --muted: #666;
+    --yellow: #f0c419;
+    --blue: #5dade2;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --purple: #a569bd;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    padding: 2rem 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: var(--yellow);
+    margin-bottom: 0.25rem;
+  }
+
+  .subtitle { color: var(--muted); font-size: 0.72rem; margin-bottom: 0.5rem; }
+  .note { color: var(--muted); font-size: 0.68rem; margin-bottom: 2rem; border-left: 2px solid var(--border); padding-left: 0.75rem; line-height: 1.6; }
+
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tab {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    background: var(--surface);
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+
+  .tab.active { background: var(--yellow); color: #000; border-color: var(--yellow); font-weight: 700; }
+  .tab:hover:not(.active) { border-color: var(--text); color: var(--text); }
+
+  .chart-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+
+  .chart-subtitle { font-size: 0.68rem; color: var(--muted); margin-bottom: 1.5rem; }
+
+  .bar-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 70px;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .bar-label {
+    font-size: 0.72rem;
+    text-align: right;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .bar-track {
+    background: var(--border);
+    border-radius: 3px;
+    height: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .bar-value {
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-align: left;
+  }
+
+  /* Scatter plot */
+  .scatter-wrap {
+    position: relative;
+    width: 100%;
+    padding-bottom: 60%;
+  }
+
+  canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .insight-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--yellow);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    font-size: 0.75rem;
+    line-height: 1.8;
+    color: var(--muted);
+  }
+
+  .insight-box strong { color: var(--text); display: block; margin-bottom: 0.5rem; font-family: 'Syne', sans-serif; font-size: 0.85rem; }
+  .insight-box span { color: var(--yellow); }
+</style>
+</head>
+<body>
+
+<h1>Scandinavian Data Engineer Skills</h1>
+<p class="subtitle">Two ways to rank the same skills — salary alone vs. salary × demand</p>
+<p class="note">Minimum 250 postings. Bash excluded as outlier (134 postings, $249K median — unrepresentative sample).</p>
+
+<div class="tabs">
+  <div class="tab active" onclick="showView('salary')">By Salary</div>
+  <div class="tab" onclick="showView('optimal')">By Optimal Score</div>
+  <div class="tab" onclick="showView('scatter')">Both Together</div>
+</div>
+
+<div id="salaryView" class="chart-container">
+  <div class="chart-title">Top Skills — Ranked by Median Salary</div>
+  <div class="chart-subtitle">Pure salary ranking. Ignores how many jobs actually require the skill.</div>
+  <div id="salaryBars"></div>
+</div>
+
+<div id="optimalView" class="chart-container" style="display:none">
+  <div class="chart-title">Top Skills — Ranked by Optimal Score</div>
+  <div class="chart-subtitle">Salary × LN(demand). Balances pay with how widely the skill is required.</div>
+  <div id="optimalBars"></div>
+</div>
+
+<div id="scatterView" class="chart-container" style="display:none">
+  <div class="chart-title">Salary vs. Demand — All Skills</div>
+  <div class="chart-subtitle">Each dot is a skill. Top-right = high salary AND high demand.</div>
+  <div class="scatter-wrap">
+    <canvas id="scatterCanvas"></canvas>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#f0c419"></div> Top 5 optimal score</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#5dade2"></div> Mid tier</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#666"></div> Lower tier</div>
+  </div>
+</div>
+
+<div class="insight-box" id="insightBox">
+  <strong>What you're seeing</strong>
+  Hadoop ranks <span>#1 by salary</span> ($150K) but <span>#4 by optimal score</span> — its demand is limited (443 postings). Spark ranks <span>#5 by salary</span> but <span>#1 by optimal score</span> — it combines strong pay with the highest demand of any specialist skill. SQL and Python barely appear in the salary ranking but sit solidly in the optimal top 10, because their massive demand compensates for lower salaries.
+</div>
+
+<script>
+const skills = [
+  { name: 'spark',      salary: 139540, optimal: 0.99, demand: 1223 },
+  { name: 'airflow',    salary: 140871, optimal: 0.96, demand: 894  },
+  { name: 'java',       salary: 135000, optimal: 0.92, demand: 884  },
+  { name: 'hadoop',     salary: 150500, optimal: 0.92, demand: 443  },
+  { name: 'scala',      salary: 135000, optimal: 0.87, demand: 613  },
+  { name: 'mongodb',    salary: 147500, optimal: 0.84, demand: 296  },
+  { name: 'bigquery',   salary: 133500, optimal: 0.83, demand: 508  },
+  { name: 'git',        salary: 125000, optimal: 0.82, demand: 685  },
+  { name: 'sql',        salary: 98302,  optimal: 0.82, demand: 4053 },
+  { name: 'aws',        salary: 107538, optimal: 0.82, demand: 2137 },
+  { name: 'python',     salary: 97528,  optimal: 0.81, demand: 4138 },
+  { name: 'azure',      salary: 98292,  optimal: 0.79, demand: 3048 },
+  { name: 'tableau',    salary: 128371, optimal: 0.78, demand: 443  },
+  { name: 'gcp',        salary: 111300, optimal: 0.77, demand: 1011 },
+  { name: 'databricks', salary: 97528,  optimal: 0.71, demand: 1414 },
+  { name: 'postgresql', salary: 122500, optimal: 0.69, demand: 270  },
+  { name: 'c#',         salary: 122892, optimal: 0.69, demand: 284  },
+  { name: 'go',         salary: 109637, optimal: 0.67, demand: 466  },
+  { name: 'power bi',   salary: 96773,  optimal: 0.66, demand: 944  },
+  { name: 'snowflake',  salary: 92500,  optimal: 0.65, demand: 1155 },
+  { name: 'redshift',   salary: 109637, optimal: 0.65, demand: 390  },
+  { name: 'kubernetes', salary: 96773,  optimal: 0.64, demand: 718  },
+  { name: 'kafka',      salary: 89100,  optimal: 0.60, demand: 841  },
+  { name: 'flow',       salary: 96773,  optimal: 0.56, demand: 339  },
+  { name: 'terraform',  salary: 86400,  optimal: 0.56, demand: 657  },
+];
+
+const top5optimal = ['spark','airflow','java','hadoop','scala'];
+
+function getBandColor(name) {
+  if (top5optimal.includes(name)) return '#f0c419';
+  if (['mongodb','bigquery','git','sql','aws','python','azure','tableau','gcp'].includes(name)) return '#5dade2';
+  return '#555';
+}
+
+function renderBars(containerId, data, key, maxVal, formatFn, colorFn) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  data.forEach(d => {
+    const pct = (d[key] / maxVal) * 100;
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = `
+      <div class="bar-label">${d.name}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${pct}%;background:${colorFn(d.name)}"></div>
+      </div>
+      <div class="bar-value">${formatFn(d[key])}</div>`;
+    container.appendChild(row);
+  });
+}
+
+// Salary view — sorted by salary desc, top 15
+const bySalary = [...skills].sort((a,b) => b.salary - a.salary).slice(0, 15);
+renderBars('salaryBars', bySalary, 'salary', 160000,
+  v => '$' + Math.round(v/1000) + 'K',
+  name => {
+    const rank = bySalary.findIndex(d => d.name === name);
+    if (rank < 3) return '#f0c419';
+    if (rank < 8) return '#5dade2';
+    return '#555';
+  }
+);
+
+// Optimal view — sorted by optimal desc, top 15
+const byOptimal = [...skills].sort((a,b) => b.optimal - a.optimal).slice(0, 15);
+renderBars('optimalBars', byOptimal, 'optimal', 1.05,
+  v => v.toFixed(2),
+  name => getBandColor(name)
+);
+
+// Scatter
+function drawScatter() {
+  const canvas = document.getElementById('scatterCanvas');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * window.devicePixelRatio;
+  canvas.height = rect.height * window.devicePixelRatio;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+  const W = rect.width;
+  const H = rect.height;
+  const pad = { top: 20, right: 20, bottom: 40, left: 55 };
+  const cW = W - pad.left - pad.right;
+  const cH = H - pad.top - pad.bottom;
+
+  const maxDemand = 4500;
+  const minSalary = 80000;
+  const maxSalary = 160000;
+
+  function xPos(demand) { return pad.left + (Math.log(demand) / Math.log(maxDemand)) * cW; }
+  function yPos(salary) { return pad.top + cH - ((salary - minSalary) / (maxSalary - minSalary)) * cH; }
+
+  // Grid
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 1;
+  [100000, 120000, 140000].forEach(s => {
+    const y = yPos(s);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y);
+    ctx.stroke();
+    ctx.fillStyle = '#444';
+    ctx.font = `${0.6 * 14}px Space Mono`;
+    ctx.textAlign = 'right';
+    ctx.fillText('$' + (s/1000) + 'K', pad.left - 6, y + 4);
+  });
+
+  // Axes labels
+  ctx.fillStyle = '#555';
+  ctx.font = '9px Space Mono';
+  ctx.textAlign = 'center';
+  ctx.fillText('← lower demand    higher demand →', pad.left + cW/2, H - 5);
+
+  // Dots
+  skills.forEach(d => {
+    const x = xPos(d.demand);
+    const y = yPos(d.salary);
+    const color = getBandColor(d.name);
+    const r = top5optimal.includes(d.name) ? 7 : 5;
+
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = color + '33';
+    ctx.fill();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Label for notable skills
+    if (top5optimal.includes(d.name) || ['sql','python','aws','azure','mongodb','hadoop'].includes(d.name)) {
+      ctx.fillStyle = color;
+      ctx.font = `bold 9px Space Mono`;
+      ctx.textAlign = x > W * 0.7 ? 'right' : 'left';
+      ctx.fillText(d.name, x + (x > W * 0.7 ? -10 : 10), y - 8);
+    }
+  });
+}
+
+function showView(view) {
+  document.getElementById('salaryView').style.display = view === 'salary' ? 'block' : 'none';
+  document.getElementById('optimalView').style.display = view === 'optimal' ? 'block' : 'none';
+  document.getElementById('scatterView').style.display = view === 'scatter' ? 'block' : 'none';
+
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['salary','optimal','scatter'][i] === view);
+  });
+
+  const insights = {
+    salary: '<strong>What you\'re seeing — Salary view</strong>Hadoop ($150K) and MongoDB ($147K) top the list, but both have under 500 postings. This ranking rewards rarity, not practicality. <span>Spark and Airflow</span> — the strongest overall skills — sit mid-table here because their salaries are slightly lower.',
+    optimal: '<strong>What you\'re seeing — Optimal Score view</strong><span>Spark and Airflow flip to the top</span> because the LN compression gives credit for their strong demand. Hadoop and MongoDB drop — their high salaries can\'t compensate for limited postings. SQL and Python enter the top 10 despite modest salaries, purely because of volume.',
+    scatter: '<strong>What you\'re seeing — Scatter view</strong>The ideal skill sits <span>top-right: high salary AND high demand</span>. Spark and Airflow are the closest to that corner among specialist skills. SQL and Python are far right (massive demand) but lower. Hadoop is high up but far left — rare and well-paid, but not broadly required.'
+  };
+
+  document.getElementById('insightBox').innerHTML = insights[view];
+
+  if (view === 'scatter') setTimeout(drawScatter, 50);
+}
+
+window.addEventListener('resize', () => {
+  if (document.getElementById('scatterView').style.display !== 'none') drawScatter();
+});
+</script>
+</body>
+</html>
